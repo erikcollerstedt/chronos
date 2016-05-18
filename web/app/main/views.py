@@ -39,7 +39,6 @@ def summary():
         print(data)
 
     else:
-        # 1. create fake schedule
         schedule = {
             'id': 5,
             'approved': False,
@@ -66,28 +65,28 @@ def summary():
                     'end': time(hour=16)
                 }, {
                     'id': 8,
-                    'index': 0,
+                    'index': 1,
                     'start': time(hour=7),
                     'lunch_start': time(hour=11),
                     'lunch_end': time(hour=12),
                     'end': time(hour=15)
                 }, {
                     'id': 9,
-                    'index': 0,
+                    'index': 2,
                     'start': time(hour=10),
                     'lunch_start': time(hour=11, minute=30),
                     'lunch_end': time(hour=12, minute=30),
                     'end': time(hour=17)
                 }, {
                     'id': 10,
-                    'index': 0,
+                    'index': 3,
                     'start': time(hour=9),
                     'lunch_start': time(hour=11, minute=30),
                     'lunch_end': time(hour=12, minute=30),
                     'end': time(hour=16, minute=30)
                 }, {
                     'id': 11,
-                    'index': 0,
+                    'index': 4,
                     'start': time(hour=6, minute=50),
                     'lunch_start': time(hour=11),
                     'lunch_end': time(hour=12),
@@ -96,7 +95,42 @@ def summary():
             }
         }
 
-        return render_template('main/summary.html', schedule=schedule)
+        positions = {
+            'workdays': [],
+            'deviations': []
+        }
+
+        def calculate_day_positions(day):
+            """Calculate css-percentages for a given day to position it in view.
+
+            Used to position different times relative to the length of a workday
+            NOTE: Hardcoded. A future improvement could be to use global config-variables 
+            to calculate workday_start and workday_end
+            """
+            workday_start = 360
+            workday_end = 1080
+            minutes_per_percent = (workday_end - workday_start) / 100
+
+            def calculate_percent(time):
+                """Calculate percentage for a given time in a workday."""
+                return ((day[time].hour * 60 + day[time].minute) - workday_start) / minutes_per_percent
+
+            return {
+                'start': calculate_percent('start'),
+                'lunch_start': calculate_percent('lunch_start'),
+                'lunch_end': calculate_percent('lunch_end'),
+                'end': calculate_percent('end')
+            }
+
+        for day in schedule['base_schedule']['workdays']:
+            positions['workdays'].append(calculate_day_positions(day))
+
+        for day in schedule['deviations']:
+            positions['deviations'].append(calculate_day_positions(day))
+
+        print(positions)
+
+        return render_template('main/summary.html', schedule=schedule, positions=positions)
 
     return ''
 
