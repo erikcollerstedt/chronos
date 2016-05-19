@@ -6,25 +6,28 @@
 		<p class="col-md-1 col-xs-12">{{ day.name if day.name else day.date }}</p>
 		<div class="col-md-11 col-xs-12">
 			<div class="work_times">
-				<div class="work_time" style="left: {{ day.start }}%; width: {{ day.lunch_start - day.start }}%;"></div>
+				<div class="work_time" style="left: {{ day.start }}%; width: {{ day.lunch_start - day.start }}%;">
+					<p class="times">{{ schedule['base_schedule'] }}</p>
+				</div>
 				<div class="work_time" style="left: {{ day.lunch_end }}%; width: {{ day.end - day.lunch_end }}%;"></div>
 			</div>
 		</div>
 	</div>
 	<br>
-
 {% endmacro %}
 
 {% block page_content %}
 	<h1>Basschema</h1>
 	<hr>
-	{% for day in schedule %}
+	{% for day in schedule_positions %}
 		{{ schedule_day(day) }}
 	{% endfor %}
 	<h1>Avvikelser</h1>
 	<hr>
-	{% for day in deviations %}
+	{% for day in deviation_positions %}
 		{{ schedule_day(day) }}
 	{% endfor %}
 	
+
+	{{ schedule }}
 {% endblock %}

@@ -111,25 +111,27 @@ def summary():
             'end': calculate_percent('end')
         }
 
-    base_schedule = []
+    schedule_positions = []
 
     for day in schedule['base_schedule']['workdays']:
         day_names = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
         new_day = calculate_day_positions(day)
         new_day['name'] = day_names[day['index']]
-        base_schedule.append(new_day)
+        schedule_positions.append(new_day)
 
-    deviations = []
+    deviation_positions = []
 
     for day in schedule['deviations']:
         new_day = calculate_day_positions(day)
         new_day['date'] = day['date']
-        deviations.append(new_day)
+        deviation_positions.append(new_day)
 
-    print(base_schedule, deviations)
+    print(schedule_positions, deviation_positions)
 
-    return render_template('main/summary.html', schedule=base_schedule, deviations=deviations)
-
+    return render_template('main/summary.html',
+                            schedule_positions=schedule_positions,
+                            deviation_positions=deviation_positions,
+                            schedule=schedule)
 
     # 2. create a template to present and allow user to edit fake data
     # 3. On update to fake data, send POST-request back to this route. (jquery post)
