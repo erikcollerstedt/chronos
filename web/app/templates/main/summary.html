@@ -1,67 +1,30 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+
+{% macro schedule_day(day) %}
+	<div class="row">
+		<p class="col-md-1 col-xs-12">{{ day.name if day.name else day.date }}</p>
+		<div class="col-md-11 col-xs-12">
+			<div class="work_times">
+				<div class="work_time" style="left: {{ day.start }}%; width: {{ day.lunch_start - day.start }}%;"></div>
+				<div class="work_time" style="left: {{ day.lunch_end }}%; width: {{ day.end - day.lunch_end }}%;"></div>
+			</div>
+		</div>
+	</div>
+	<br>
+
+{% endmacro %}
+
 {% block page_content %}
 	<h1>Basschema</h1>
 	<hr>
-	<div class="row">
-		<p class="col-md-1 col-xs-12">Måndag:</p>
-		<div class="col-md-11 col-xs-12">
-			<div class="work_time">
-				<div class="lunch">
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
-	<div class="row">
-		<p class="col-md-1 col-xs-12">Tisdag:</p>
-		<div class="col-md-11 col-xs-12">
-			<div class="work_time">
-				<div class="lunch">
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
-	<div class="row">
-		<p class="col-md-1 col-xs-12">Onsdag:</p>
-		<div class="col-md-11 col-xs-12">
-			<div class="work_time">
-				<div class="lunch">
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
-	<div class="row">
-		<p class="col-md-1 col-xs-12">Torsdag:</p>
-		<div class="col-md-11 col-xs-12">
-			<div class="work_time">
-				<div class="lunch">
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
-	<div class="row">
-		<p class="col-md-1 col-xs-12">Fredag:</p>
-		<div class="col-md-11 col-xs-12">
-			<div class="work_time">
-				<div class="lunch">
-				</div>
-			</div>
-		</div>
-	</div>
+	{% for day in schedule %}
+		{{ schedule_day(day) }}
+	{% endfor %}
 	<h1>Avvikelser</h1>
 	<hr>
-<div class="row">
-		<p class="col-md-1 col-xs-12">2016/09/10</p>
-		<div class="col-md-11 col-xs-12">
-			<div class="work_time">
-				<div class="lunch">
-				</div>
-			</div>
-		</div>
-	</div>
+	{% for day in deviations %}
+		{{ schedule_day(day) }}
+	{% endfor %}
 	
 {% endblock %}

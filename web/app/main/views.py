@@ -30,109 +30,106 @@ def base_schedule():
     return ''
 
 
-@main.route('/summary', methods=['GET', 'POST'])
+@main.route('/summary')
 @login_required
 def summary():
-    data = request.get_json()
-
-    if data:
-        print(data)
-
-    else:
-        schedule = {
-            'id': 5,
-            'approved': False,
-            'user_id': 10,
-            'work_period_id': 2,
-            'deviations': [{
-                'id': 38,
-                'schedule_id': 5,
-                'date': date(year=2016, month=5, day=11),
-                'start': time(hour=8, minute=30),
+    schedule = {
+        'id': 5,
+        'approved': False,
+        'user_id': 10,
+        'work_period_id': 2,
+        'deviations': [{
+            'id': 38,
+            'schedule_id': 5,
+            'date': date(year=2016, month=5, day=11),
+            'start': time(hour=8, minute=30),
+            'lunch_start': time(hour=11),
+            'lunch_end': time(hour=12),
+            'end': time(hour=16, minute=25)
+        }],
+        'base_schedule': {
+            'id': 1,
+            'schedule_id': 5,
+            'workdays': [{
+                'id': 7,
+                'index': 0,
+                'start': time(hour=8),
+                'lunch_start': time(hour=11, minute=30),
+                'lunch_end': time(hour=12, minute=30),
+                'end': time(hour=16)
+            }, {
+                'id': 8,
+                'index': 1,
+                'start': time(hour=7),
                 'lunch_start': time(hour=11),
                 'lunch_end': time(hour=12),
-                'end': time(hour=16, minute=25)
-            }],
-            'base_schedule': {
-                'id': 1,
-                'schedule_id': 5,
-                'workdays': [{
-                    'id': 7,
-                    'index': 0,
-                    'start': time(hour=8),
-                    'lunch_start': time(hour=11, minute=30),
-                    'lunch_end': time(hour=12, minute=30),
-                    'end': time(hour=16)
-                }, {
-                    'id': 8,
-                    'index': 1,
-                    'start': time(hour=7),
-                    'lunch_start': time(hour=11),
-                    'lunch_end': time(hour=12),
-                    'end': time(hour=15)
-                }, {
-                    'id': 9,
-                    'index': 2,
-                    'start': time(hour=10),
-                    'lunch_start': time(hour=11, minute=30),
-                    'lunch_end': time(hour=12, minute=30),
-                    'end': time(hour=17)
-                }, {
-                    'id': 10,
-                    'index': 3,
-                    'start': time(hour=9),
-                    'lunch_start': time(hour=11, minute=30),
-                    'lunch_end': time(hour=12, minute=30),
-                    'end': time(hour=16, minute=30)
-                }, {
-                    'id': 11,
-                    'index': 4,
-                    'start': time(hour=6, minute=50),
-                    'lunch_start': time(hour=11),
-                    'lunch_end': time(hour=12),
-                    'end': time(hour=14, minute=30)
-                }]
-            }
+                'end': time(hour=15)
+            }, {
+                'id': 9,
+                'index': 2,
+                'start': time(hour=10),
+                'lunch_start': time(hour=11, minute=30),
+                'lunch_end': time(hour=12, minute=30),
+                'end': time(hour=17)
+            }, {
+                'id': 10,
+                'index': 3,
+                'start': time(hour=9),
+                'lunch_start': time(hour=11, minute=30),
+                'lunch_end': time(hour=12, minute=30),
+                'end': time(hour=16, minute=30)
+            }, {
+                'id': 11,
+                'index': 4,
+                'start': time(hour=6, minute=50),
+                'lunch_start': time(hour=11),
+                'lunch_end': time(hour=12),
+                'end': time(hour=14, minute=30)
+            }]
+        }
+    }
+
+    def calculate_day_positions(day):
+        """Calculate css-percentages for a given day to position it in view.
+
+        Used to position different times relative to the length of a workday
+        NOTE: Hardcoded. A future improvement could be to use global config-variables 
+        to calculate workday_start and workday_end
+        """
+        workday_start = 360
+        workday_end = 1080
+        minutes_per_percent = (workday_end - workday_start) / 100
+
+        def calculate_percent(time):
+            """Calculate percentage for a given time in a workday."""
+            return ((day[time].hour * 60 + day[time].minute) - workday_start) / minutes_per_percent
+
+        return {
+            'start': calculate_percent('start'),
+            'lunch_start': calculate_percent('lunch_start'),
+            'lunch_end': calculate_percent('lunch_end'),
+            'end': calculate_percent('end')
         }
 
-        positions = {
-            'workdays': [],
-            'deviations': []
-        }
+    base_schedule = []
 
-        def calculate_day_positions(day):
-            """Calculate css-percentages for a given day to position it in view.
+    for day in schedule['base_schedule']['workdays']:
+        day_names = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
+        new_day = calculate_day_positions(day)
+        new_day['name'] = day_names[day['index']]
+        base_schedule.append(new_day)
 
-            Used to position different times relative to the length of a workday
-            NOTE: Hardcoded. A future improvement could be to use global config-variables 
-            to calculate workday_start and workday_end
-            """
-            workday_start = 360
-            workday_end = 1080
-            minutes_per_percent = (workday_end - workday_start) / 100
+    deviations = []
 
-            def calculate_percent(time):
-                """Calculate percentage for a given time in a workday."""
-                return ((day[time].hour * 60 + day[time].minute) - workday_start) / minutes_per_percent
+    for day in schedule['deviations']:
+        new_day = calculate_day_positions(day)
+        new_day['date'] = day['date']
+        deviations.append(new_day)
 
-            return {
-                'start': calculate_percent('start'),
-                'lunch_start': calculate_percent('lunch_start'),
-                'lunch_end': calculate_percent('lunch_end'),
-                'end': calculate_percent('end')
-            }
+    print(base_schedule, deviations)
 
-        for day in schedule['base_schedule']['workdays']:
-            positions['workdays'].append(calculate_day_positions(day))
+    return render_template('main/summary.html', schedule=base_schedule, deviations=deviations)
 
-        for day in schedule['deviations']:
-            positions['deviations'].append(calculate_day_positions(day))
-
-        print(positions)
-
-        return render_template('main/summary.html', schedule=schedule, positions=positions)
-
-    return ''
 
     # 2. create a template to present and allow user to edit fake data
     # 3. On update to fake data, send POST-request back to this route. (jquery post)
